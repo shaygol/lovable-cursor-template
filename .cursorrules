@@ -1,0 +1,46 @@
+# Project Development Rules
+You are an expert Full-stack developer. Your goal is to maintain high-quality code and UI consistency.
+
+## Tech Stack & Consistency
+- Stack: React (Vite) + TypeScript, Tailwind CSS, shadcn/ui.
+- Icons: Lucide React.
+- Data: TanStack Query + Supabase.
+- IMPORTANT: Prioritize modularity, reusability, and clean prop-types.
+- IMPORTANT: Always prioritize using the knowledge from indexed @Docs (Supabase, Tailwind, shadcn) to ensure up-to-date implementation.
+- MOCK DATA: If a database schema is missing, use clean TypeScript interfaces to define expected data structures. Always prefer descriptive naming conventions.
+
+## Database & Schema Methodology (IMPORTANT)
+- ABSENT SCHEMA: If no `@db-schema.md` exists or is empty, DO NOT guess table names or column types. Instead, prompt the user: "Please provide the Supabase schema or table definitions for this feature."
+- PLACEHOLDERS: Use descriptive placeholder names (e.g., 'table_name', 'column_name') in comments where SQL/Supabase logic is required, ensuring easy replacement later.
+
+## Prompt Ops & Consistency (CRITICAL)
+- PROMPT FOLDER: Always check the `/ai-utils` folder for the general UI style guide (`@ui-style.md`) before creating new UI elements or features.
+- UI CONSISTENCY: When asked to build a new page or component, look for `@ui-style.md` to ensure the design matches the original aesthetic (Premium style, shadow-sm, specific Hebrew typography).
+- VISUAL ASSETS: Use the status indicators and emojis defined in `@visual-assets.md` for consistency in dashboards and lists.
+- USAGE PATTERN: When the user says "Add [Feature]", analyze existing prompt files to replicate the same Zod validation and RTL alignment patterns.
+- Ensure all new components follow the Hebrew/RTL rules and Typography defined in this project to avoid visual regressions.
+
+## Hebrew & RTL (CRITICAL)
+- The app is in Hebrew. Use `dir="rtl"` on main layouts.
+- Use Tailwind LOGICAL properties exclusively to ensure bidirectional support:
+  - `ms-*` instead of `ml-*`
+  - `me-*` instead of `mr-*`
+  - `ps-*` instead of `pl-*`
+  - `pe-*` instead of `pr-*`
+- TYPOGRAPHY: Use modern Hebrew fonts like 'Heebo' or 'Assistant' for a professional look. Ensure font weights are consistent (400 for body, 600/700 for headings).
+- All user-facing text must be in Hebrew.
+
+## Lovable Detection (Auto-Check)
+- On first interaction, check if the project was scaffolded by Lovable by looking for these markers:
+  1. `lovable-tagger` in `devDependencies` inside `package.json`.
+  2. `componentTagger` imported from `lovable-tagger` in `vite.config.ts`.
+  3. README.md containing "Welcome to your Lovable project" or a `lovable.dev/projects/` URL.
+- If detected: Note that the project originated from Lovable. Respect existing Lovable component patterns, shadcn/ui structure, and the `@` path alias convention.
+- If not detected: Treat as a standard project and follow the rules defined here.
+
+## Standards
+- Prioritize modularity and reusability in all components and utilities.
+- Use Arrow Functions for components.
+- No 'any' type in TypeScript.
+- Always check `@/components/ui` before creating new UI elements.
+- DOCUMENTATION: For every meaningful change in the project (new features, structural changes, stack updates), update BOTH `README.md` (English) and `README_he.md` (Hebrew) to keep them in sync.
