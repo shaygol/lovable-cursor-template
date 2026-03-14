@@ -1,4 +1,4 @@
-﻿# Lovable to Cursor: savta_yoel
+# Lovable to Cursor: savta_yoel
 
 > [README in Hebrew](README_he.md) | [Original Lovable README](README_lovable.md)
 
@@ -16,21 +16,21 @@ A premium Hebrew (RTL) web application built with cutting-edge 2026 technologies
 
 ## New Project Setup (setup.bat)
 
-The `setup.bat` script is the fastest way to turn this template into a working project. It performs an automatic merge between the code generated in Lovable and the template's professional infrastructure.
+The `setup.bat` script merges the Lovable-generated code into this template's professional infrastructure.
 
-### Requirements
+### Step 1 — Create your project repo from this template
 
-- [Git](https://git-scm.com/) installed and available in PATH
-- [Node.js](https://nodejs.org/) (v18 or above)
-- A Lovable GitHub repository URL
+On GitHub, click **"Use this template" > "Create a new repository"**, name it, and clone it to your machine.
 
-### Usage
+> This gives you a fresh repo already connected to your GitHub - no manual `git remote` needed.
+
+### Step 2 — Run setup.bat
 
 ```bash
 setup.bat <LOVABLE_GITHUB_URL>
 ```
 
-Or alternatively, run without parameters - the script will ask for details interactively:
+Or without parameters for interactive mode:
 
 ```bash
 setup.bat
@@ -44,20 +44,17 @@ setup.bat
 | 2 | Saves the original Lovable README as `README_lovable.md` |
 | 3 | Merges configuration files (`package.json`, `vite.config.ts`, `tailwind.config.ts`, etc.) |
 | 4 | Copies source directories (`src/`, `public/`, `supabase/`) |
-| 5 | Replaces `savta_yoel` with the entered project name in README files |
+| 5 | Replaces `<TITLE>` with the entered project name in README files |
 | 6 | Cleans up the temporary folder |
 | 7 | Resets Git - removes the template history and initializes a fresh repo |
 | 8 | Installs all dependencies (`npm install`) |
 | 9 | Creates a base commit marking the starting point for development |
 
-The script deletes the template's `.git` folder and initializes a brand new repository. This way your project starts with a clean history, completely disconnected from the original template.
-
-### After Setup
+### Step 3 — After Setup
 
 ```bash
-# Create a new repo on GitHub and connect it
-git remote add origin <YOUR_REPO_URL>
-git push -u origin main
+# Push the base commit to your repo
+git push -u origin master
 
 # Run the project
 npm run dev
