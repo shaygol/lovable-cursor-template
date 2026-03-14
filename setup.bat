@@ -107,7 +107,7 @@ echo       Done.
 
 :: Step 8: Install dependencies
 echo [8/9] Installing dependencies...
-call npm install
+call npm install --legacy-peer-deps
 echo       Done.
 
 :: Step 9: Create base commit

@@ -1,6 +1,6 @@
-<div dir="rtl">
+﻿<div dir="rtl">
 
-# Lovable to Cursor: <TITLE>
+# Lovable to Cursor: savta_yoel
 
 > [README in English](README.md) | [Original Lovable README](README_lovable.md)
 
@@ -46,7 +46,7 @@ setup.bat
 | שמירת ה-README המקורי של Lovable כ-`README_lovable.md` | 2 |
 | מיזוג קבצי הקונפיגורציה (`package.json`, `vite.config.ts`, `tailwind.config.ts` ועוד) | 3 |
 | העתקת תיקיות הקוד (`src/`, `public/`, `supabase/`) | 4 |
-| החלפת `<TITLE>` בשם הפרויקט שהוזן בקבצי ה-README | 5 |
+| החלפת `savta_yoel` בשם הפרויקט שהוזן בקבצי ה-README | 5 |
 | ניקוי התיקייה הזמנית | 6 |
 | איפוס Git - מחיקת ההיסטוריה של התבנית ויצירת ריפו חדש ונקי | 7 |
 | התקנת כל התלויות (`npm install`) | 8 |
@@ -108,7 +108,7 @@ npm run build
 <div dir="ltr">
 
 ```
-<TITLE>/
+savta_yoel/
 ├── ai-utils/             # קבצי קונפיגורציה והנחיות לסוכני AI
 │   ├── db-schema.md      # הגדרות מבנה בסיס הנתונים - מקור האמת היחיד
 │   ├── ui-style.md       # מדריך סגנון ויזואלי (Design System)

@@ -1,4 +1,4 @@
-# Lovable to Cursor: <TITLE>
+﻿# Lovable to Cursor: savta_yoel
 
 > [README in Hebrew](README_he.md) | [Original Lovable README](README_lovable.md)
 
@@ -44,7 +44,7 @@ setup.bat
 | 2 | Saves the original Lovable README as `README_lovable.md` |
 | 3 | Merges configuration files (`package.json`, `vite.config.ts`, `tailwind.config.ts`, etc.) |
 | 4 | Copies source directories (`src/`, `public/`, `supabase/`) |
-| 5 | Replaces `<TITLE>` with the entered project name in README files |
+| 5 | Replaces `savta_yoel` with the entered project name in README files |
 | 6 | Cleans up the temporary folder |
 | 7 | Resets Git - removes the template history and initializes a fresh repo |
 | 8 | Installs all dependencies (`npm install`) |
@@ -104,7 +104,7 @@ npm run build
 Designed for easy navigation by both human developers and AI agents, with a clear separation between logic, design, and configuration:
 
 ```
-<TITLE>/
+savta_yoel/
 ├── ai-utils/             # The operational brain: AI agent configuration and guidance files
 │   ├── db-schema.md      # Database schema definitions - the single source of truth for data
 │   ├── ui-style.md       # Visual style guide for design consistency (Design System)
