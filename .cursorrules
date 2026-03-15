@@ -12,6 +12,14 @@ You are an expert Full-stack developer. Your goal is to maintain high-quality co
 ## Database & Schema Methodology (IMPORTANT)
 - ABSENT SCHEMA: If no `@db-schema.md` exists or is empty, DO NOT guess table names or column types. Instead, prompt the user: "Please provide the Supabase schema or table definitions for this feature."
 - PLACEHOLDERS: Use descriptive placeholder names (e.g., 'table_name', 'column_name') in comments where SQL/Supabase logic is required, ensuring easy replacement later.
+- RLS ENUMS: When writing RLS policies that check a custom enum role (e.g., `app_role`), always cast string literals explicitly: `'admin'::app_role`. A plain `'admin'` string will cause a type mismatch error at runtime.
+- RLS FUNCTION PREFIX: Always call custom functions with the `public.` schema prefix inside storage policies: `public.has_role(auth.uid(), 'admin'::app_role)`. Storage policies run in the `storage` schema context and will not resolve unqualified function names.
+
+## Supabase Auth & Storage (CRITICAL)
+- API KEY: Always use the Supabase **anon JWT** (`eyJ...`) as `VITE_SUPABASE_ANON_KEY`. Never use a platform publishable key (e.g., `sb_publishable_...`) — it will silently fail for all authenticated requests.
+- STORAGE UPLOAD: Never use `upsert: true` in `supabase.storage.upload()`. This triggers an UPDATE path that requires a separate `USING` RLS policy. Use a plain `upload()` with `upsert: false` (the default) so only the INSERT `WITH CHECK` policy is evaluated.
+- STORAGE BUCKET STRUCTURE: Organize files into subfolders by content type (e.g., `products/`, `articles/`, `branding/`) within a single bucket. This keeps RLS policies simple and bucket management clean.
+- See `ai-utils/supabase-patterns.md` for a full list of known pitfalls.
 
 ## Prompt Ops & Consistency (CRITICAL)
 - PROMPT FOLDER: Always check the `/ai-utils` folder for the general UI style guide (`@ui-style.md`) before creating new UI elements or features.
@@ -30,17 +38,10 @@ You are an expert Full-stack developer. Your goal is to maintain high-quality co
 - TYPOGRAPHY: Use modern Hebrew fonts like 'Heebo' or 'Assistant' for a professional look. Ensure font weights are consistent (400 for body, 600/700 for headings).
 - All user-facing text must be in Hebrew.
 
-## Lovable Detection (Auto-Check)
-- On first interaction, check if the project was scaffolded by Lovable by looking for these markers:
-  1. `lovable-tagger` in `devDependencies` inside `package.json`.
-  2. `componentTagger` imported from `lovable-tagger` in `vite.config.ts`.
-  3. README.md containing "Welcome to your Lovable project" or a `lovable.dev/projects/` URL.
-- If detected: Note that the project originated from Lovable. Respect existing Lovable component patterns, shadcn/ui structure, and the `@` path alias convention.
-- If not detected: Treat as a standard project and follow the rules defined here.
-
 ## Standards
 - Prioritize modularity and reusability in all components and utilities.
 - Use Arrow Functions for components.
 - No 'any' type in TypeScript.
 - Always check `@/components/ui` before creating new UI elements.
 - DOCUMENTATION: For every meaningful change in the project (new features, structural changes, stack updates), update BOTH `README.md` (English) and `README_he.md` (Hebrew) to keep them in sync.
+- DATA QUERIES: Always filter queries to the current user's data. Never fetch unbounded rows that belong to other users. Use RLS policies as the server-side safety net, and always add client-side `.eq()` filters as an additional layer.

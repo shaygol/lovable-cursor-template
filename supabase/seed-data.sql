@@ -1,0 +1,34 @@
+-- ==============================================
+-- <TITLE> - Seed Data
+-- Run this in Supabase SQL Editor AFTER init-schema.sql
+-- ==============================================
+-- Replace all placeholder values below with your actual data.
+-- Use this file to pre-populate lookup tables, default settings,
+-- and any static content your app needs to function on first run.
+-- ==============================================
+
+-- -----------------------------------------------
+-- Default settings
+-- Add one row per setting key your app uses.
+-- The 'value' column is JSONB — wrap strings in double quotes.
+-- -----------------------------------------------
+-- INSERT INTO public.settings (key, value) VALUES
+--   ('business_name',     '"<Your Business Name>"'),
+--   ('business_slogan',   '"<Your Slogan>"'),
+--   ('contact_phone',     '"05XXXXXXXX"'),
+--   ('site_enabled',      'true'),
+--   ('primary_color',     '"#000000"');
+
+-- -----------------------------------------------
+-- First admin user
+-- Run AFTER a user signs up via the app so the auth.users row exists.
+-- Replace the UUID with the actual user ID from:
+--   Supabase Dashboard > Authentication > Users
+-- -----------------------------------------------
+-- INSERT INTO public.user_roles (user_id, role) VALUES
+--   ('<your-admin-user-uuid>', 'admin');
+
+-- -----------------------------------------------
+-- Project-specific seed data
+-- Paste your own INSERT statements below.
+-- -----------------------------------------------

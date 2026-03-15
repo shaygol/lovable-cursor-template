@@ -3,7 +3,7 @@ chcp 65001 >nul
 setlocal enabledelayedexpansion
 
 echo ============================================
-echo   Lovable to Cursor - Project Setup
+echo   Cursor Project Setup
 echo ============================================
 echo.
 
@@ -16,7 +16,7 @@ if errorlevel 1 (
 
 :: Get clone URL
 if "%~1"=="" (
-    set /p "CLONE_URL=Enter the Lovable GitHub clone URL: "
+    set /p "CLONE_URL=Enter the GitHub clone URL: "
 ) else (
     set "CLONE_URL=%~1"
 )
@@ -27,93 +27,95 @@ if "!CLONE_URL!"=="" (
 )
 
 :: Ask for project title
-set /p "PROJECT_TITLE=Enter project title: "
+set /p "PROJECT_TITLE=Enter project title (Hebrew or English): "
 
 echo.
-echo Clone URL: !CLONE_URL!
-echo Project title: !PROJECT_TITLE!
-echo Working directory: %CD%
+echo Clone URL:    !CLONE_URL!
+echo Project:      !PROJECT_TITLE!
+echo Directory:    %CD%
 echo.
 
-:: Step 1: Clone to a temp folder
-echo [1/9] Cloning Lovable project...
-if exist ".lovable-temp" rmdir /S /Q ".lovable-temp"
-git clone "!CLONE_URL!" ".lovable-temp"
+:: Step 1: Clone project to temp folder
+echo [1/8] Cloning project...
+if exist ".setup-temp" rmdir /S /Q ".setup-temp"
+git clone "!CLONE_URL!" ".setup-temp"
 if errorlevel 1 (
     echo ERROR: Git clone failed.
     goto :cleanup
 )
 echo       Done.
 
-:: Step 2: Save Lovable's original README
-echo [2/9] Saving Lovable README as README_lovable.md...
-if exist ".lovable-temp\README.md" (
-    copy /Y ".lovable-temp\README.md" "README_lovable.md" >nul
-)
-echo       Done.
-
-:: Step 3: Copy Lovable files into current folder (skip template files)
-echo [3/9] Merging Lovable files into project...
+:: Step 2: Copy config files
+echo [2/8] Copying config files...
 for %%F in (
-    ".lovable-temp\package.json"
-    ".lovable-temp\package-lock.json"
-    ".lovable-temp\bun.lockb"
-    ".lovable-temp\vite.config.ts"
-    ".lovable-temp\tailwind.config.ts"
-    ".lovable-temp\tsconfig.json"
-    ".lovable-temp\tsconfig.app.json"
-    ".lovable-temp\tsconfig.node.json"
-    ".lovable-temp\components.json"
-    ".lovable-temp\postcss.config.js"
-    ".lovable-temp\eslint.config.js"
-    ".lovable-temp\index.html"
+    ".setup-temp\package.json"
+    ".setup-temp\package-lock.json"
+    ".setup-temp\bun.lockb"
+    ".setup-temp\vite.config.ts"
+    ".setup-temp\tailwind.config.ts"
+    ".setup-temp\tsconfig.json"
+    ".setup-temp\tsconfig.app.json"
+    ".setup-temp\tsconfig.node.json"
+    ".setup-temp\components.json"
+    ".setup-temp\postcss.config.js"
+    ".setup-temp\eslint.config.js"
+    ".setup-temp\index.html"
 ) do (
     if exist "%%~F" copy /Y "%%~F" "." >nul 2>nul
 )
 echo       Done.
 
-:: Step 4: Copy source directories from Lovable
-echo [4/9] Copying src/ and public/ directories...
-if exist ".lovable-temp\src" (
+:: Step 3: Copy source directories
+echo [3/8] Copying src/ and public/ directories...
+if exist ".setup-temp\src" (
     if not exist "src" mkdir "src"
-    xcopy ".lovable-temp\src\*" "src\" /E /Y /Q >nul
+    xcopy ".setup-temp\src\*" "src\" /E /Y /Q >nul
 )
-if exist ".lovable-temp\public" (
+if exist ".setup-temp\public" (
     if not exist "public" mkdir "public"
-    xcopy ".lovable-temp\public\*" "public\" /E /Y /Q >nul
+    xcopy ".setup-temp\public\*" "public\" /E /Y /Q >nul
 )
-if exist ".lovable-temp\supabase" (
+if exist ".setup-temp\supabase" (
     if not exist "supabase" mkdir "supabase"
-    xcopy ".lovable-temp\supabase\*" "supabase\" /E /Y /Q >nul
+    xcopy ".setup-temp\supabase\*" "supabase\" /E /Y /Q >nul
 )
 echo       Done.
 
-:: Step 5: Replace <TITLE> in README files
-echo [5/9] Setting project title in README files...
+:: Step 4: Set project title in README files
+echo [4/8] Setting project title in README files...
 powershell -Command "(Get-Content 'README.md' -Encoding UTF8) -replace '<TITLE>', '!PROJECT_TITLE!' | Set-Content 'README.md' -Encoding UTF8"
 powershell -Command "(Get-Content 'README_he.md' -Encoding UTF8) -replace '<TITLE>', '!PROJECT_TITLE!' | Set-Content 'README_he.md' -Encoding UTF8"
 echo       Done.
 
+:: Step 5: Create .env from example if it doesn't exist
+echo [5/8] Setting up .env...
+if not exist ".env" (
+    if exist ".env.example" (
+        copy /Y ".env.example" ".env" >nul
+        echo       Created .env from .env.example — fill in your Supabase credentials.
+    ) else (
+        echo VITE_SUPABASE_URL=https://your-project.supabase.co > .env
+        echo VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... >> .env
+        echo       Created .env placeholder — fill in your Supabase anon key ^(eyJ...^).
+    )
+) else (
+    echo       .env already exists, skipping.
+)
+
 :: Step 6: Clean up temp folder
-echo [6/9] Cleaning up temp files...
-rmdir /S /Q ".lovable-temp"
+echo [6/8] Cleaning up temp files...
+rmdir /S /Q ".setup-temp"
 echo       Done.
 
-:: Step 7: Reset git - remove template history and create a fresh repo
-echo [7/9] Initializing fresh git repository...
+:: Step 7: Initialize fresh git repository
+echo [7/8] Initializing fresh git repository...
 if exist ".git" rmdir /S /Q ".git"
 git init >nul
 echo       Done.
 
 :: Step 8: Install dependencies
-echo [8/9] Installing dependencies...
+echo [8/8] Installing dependencies...
 call npm install --legacy-peer-deps
-echo       Done.
-
-:: Step 9: Create base commit
-echo [9/9] Creating base commit...
-git add .
-git commit -m "Base: !PROJECT_TITLE! — Lovable project merged with Cursor template" >nul
 echo       Done.
 
 echo.
@@ -124,18 +126,35 @@ echo.
 echo Your project "!PROJECT_TITLE!" is ready at: %CD%
 echo.
 echo Next steps:
-echo   1. Create a new repo on GitHub for your project
-echo   2. Connect it:  git remote add origin ^<YOUR_REPO_URL^>
-echo   3. Push:        git push -u origin main
-echo   4. Run:         npm run dev
-echo   5. Open Supabase SQL Editor and run the query from ai-utils/db-schema.md
-echo   6. Paste the schema results into ai-utils/db-schema.md
-echo   7. Open in Cursor and start building!
+echo   1. Fill in your Supabase credentials in .env
+echo      - URL:      Supabase Dashboard ^> Project Settings ^> API ^> Project URL
+echo      - ANON KEY: Supabase Dashboard ^> Project Settings ^> API ^> anon public ^(eyJ...^)
+echo.
+echo   2. Run the database schema in Supabase SQL Editor:
+echo      supabase\init-schema.sql  ^(roles, profiles, storage policies^)
+echo.
+echo   3. Populate the db-schema reference for the AI:
+echo      Run this query and paste results into ai-utils\db-schema.md:
+echo      SELECT table_name, column_name, data_type
+echo      FROM information_schema.columns
+echo      WHERE table_schema = 'public';
+echo.
+echo   4. Create a new GitHub repo and push:
+echo      git remote add origin ^<YOUR_REPO_URL^>
+echo      git add .
+echo      git commit -m "Initial commit: !PROJECT_TITLE!"
+echo      git push -u origin main
+echo.
+echo   5. Run the dev server:
+echo      npm run dev
+echo.
+echo   6. Open in Cursor and start building!
+echo      Read ai-utils\supabase-patterns.md before touching auth or storage.
 echo.
 goto :end
 
 :cleanup
-if exist ".lovable-temp" rmdir /S /Q ".lovable-temp"
+if exist ".setup-temp" rmdir /S /Q ".setup-temp"
 
 :end
 endlocal
