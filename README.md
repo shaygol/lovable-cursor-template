@@ -36,30 +36,51 @@ Or without parameters for interactive mode:
 setup.bat
 ```
 
-### What the Script Does (9 Steps)
+### Choose your work mode
+
+The script asks you to choose between two modes:
+
+| | Mode 1: Cursor only | Mode 2: Cursor + Lovable |
+|---|---|---|
+| **Git** | Fresh history, disconnected from Lovable | Keeps GitHub connection, Lovable stays in sync |
+| **Lovable deps** | Removed (`lovable-tagger`, `cloud-auth-js`) | Kept as-is |
+| **After setup** | Create new GitHub repo and push | `git push` — Lovable syncs automatically |
+| **Best for** | Full Cursor development | Using both tools in parallel |
+
+> **Tip for mode 2:** Avoid editing the same file from both Cursor and Lovable simultaneously to prevent merge conflicts.
+
+### What the Script Does (10 Steps)
 
 | Step | Action |
 |------|--------|
 | 1 | Clones the Lovable project to a temporary folder |
-| 2 | Saves the original Lovable README as `README_lovable.md` |
-| 3 | Merges configuration files (`package.json`, `vite.config.ts`, `tailwind.config.ts`, etc.) |
-| 4 | Copies source directories (`src/`, `public/`, `supabase/`) |
+| 2 | Copies configuration files (`package.json`, `vite.config.ts`, etc.) |
+| 3 | Copies source directories (`src/`, `public/`, `supabase/`) |
+| 4 | Saves the original Lovable README as `README_lovable.md` |
 | 5 | Replaces `<TITLE>` with the entered project name in README files |
-| 6 | Cleans up the temporary folder |
-| 7 | Resets Git - removes the template history and initializes a fresh repo |
-| 8 | Installs all dependencies (`npm install`) |
-| 9 | Creates a base commit marking the starting point for development |
+| 6 | Removes Lovable-specific dependencies (mode 1 only) |
+| 7 | Creates `.env` from `.env.example` |
+| 8 | Cleans up the temporary folder |
+| 9 | Git setup (fresh repo for mode 1 / commit template files for mode 2) |
+| 10 | Installs all dependencies (`npm install --legacy-peer-deps`) |
 
 ### Step 3 — After Setup
 
 ```bash
-# Push the base commit to your repo
-git push -u origin master
-
 # Run the project
 npm run dev
 
-# Update the database schema in ai-utils/db-schema.md
+# Run supabase/init-schema.sql in Supabase SQL Editor
+
+# Update the database schema reference for the AI
+# Run in Supabase SQL Editor and paste into ai-utils/db-schema.md:
+# SELECT table_name, column_name, data_type
+# FROM information_schema.columns
+# WHERE table_schema = 'public';
+
+# Add environment variables in Vercel:
+# VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+
 # Open in Cursor and start building!
 ```
 
