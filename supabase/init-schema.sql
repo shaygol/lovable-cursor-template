@@ -24,6 +24,11 @@ CREATE TABLE IF NOT EXISTS public.user_roles (
 
 ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 
+CREATE POLICY "Users can read own role"
+  ON public.user_roles FOR SELECT
+  TO authenticated
+  USING (user_id = auth.uid());
+
 CREATE POLICY "Admins can manage roles"
   ON public.user_roles
   FOR ALL
