@@ -45,3 +45,15 @@ You are an expert Full-stack developer. Your goal is to maintain high-quality co
 - Always check `@/components/ui` before creating new UI elements.
 - DOCUMENTATION: For every meaningful change in the project (new features, structural changes, stack updates), update BOTH `README.md` (English) and `README_he.md` (Hebrew) to keep them in sync.
 - DATA QUERIES: Always filter queries to the current user's data. Never fetch unbounded rows that belong to other users. Use RLS policies as the server-side safety net, and always add client-side `.eq()` filters as an additional layer.
+
+## Data Integrity (CRITICAL)
+- JSONB INSERT: When inserting numeric values into JSONB columns, always cast explicitly: `'30'::jsonb` not `'30'`. JavaScript reads uncast values as the string `"30"` and `Number('"30"')` returns `NaN`, silently breaking any logic that depends on the value.
+- OWNER_ID: Every table with an `owner_id NOT NULL` column must include `owner_id: user.id` in every INSERT. Missing it causes a DB error even when RLS would otherwise allow the operation.
+- FK BEFORE INSERT: Never store an entity name directly in a child table when a FK relationship exists. Always lookup or insert the parent entity first, then reference its `id` as the foreign key.
+- ENUM/CHECK ALIGNMENT: Before adding a new option to a UI select/dropdown, verify it exactly matches the DB `CHECK` constraint values. A value not in the constraint will cause the insert to fail silently or with a generic error.
+
+## UI & UX Standards (CRITICAL)
+- NO NATIVE DIALOGS: Never use `window.confirm()` or `window.prompt()`. Replace with shadcn `AlertDialog` for confirmations and inline input fields for data entry.
+- NO FAKE SUCCESS: Never show `toast.success` before a Supabase operation completes and returns without error. Always `await` the result, check the `error` field, and only then trigger success feedback.
+- NO HARDCODED AMOUNTS: Never render currency amounts as `` `$${x.toLocaleString()}` ``. Always use a formatting function or hook that respects the user's preferred currency/locale.
+- UNUSED CODE: After any refactor, remove unused variables and imports immediately. Dead `const sym = ...` declarations and unused icon imports cause linter noise and obscure real issues.
