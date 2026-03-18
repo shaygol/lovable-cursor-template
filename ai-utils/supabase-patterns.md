@@ -122,7 +122,53 @@ await supabase.storage.from('images').upload(path, file);
 
 ---
 
-## 8. Auto-delete orphaned uploads
+## 8. Edge Functions — Always verify role, not just auth
+
+A function that only checks `Authorization: Bearer <token>` verifies that the user is logged in, but not *who* they are. Any authenticated user (including viewers) can call it.
+
+If the function accesses private storage or performs admin-level operations, always query `user_roles` after verifying the token:
+
+```ts
+const token = authHeader.replace("Bearer ", "");
+const { data: claimsData } = await supabase.auth.getClaims(token);
+const userId = claimsData?.claims?.sub;
+
+const { data: roleData } = await supabase
+  .from("user_roles")
+  .select("role")
+  .eq("user_id", userId)
+  .in("role", ["admin", "manager"])
+  .maybeSingle();
+
+if (!roleData) {
+  return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 });
+}
+```
+
+This is especially critical for functions that use the `SUPABASE_SERVICE_ROLE_KEY` — the service key bypasses all RLS, so the function itself is the only access gate.
+
+---
+
+## 9. RLS — Never use `USING (true)` on tables with PII or financial data
+
+`USING (true)` exposes every row to every authenticated user. Only use it for fully public reference data (e.g., `app_settings`).
+
+For tables with personal data (name, phone, email, financial balances), always restrict:
+
+```sql
+-- Owner-only (e.g., profiles):
+USING (auth.uid() = user_id)
+
+-- Admin/manager only (e.g., tenants, contacts):
+USING (
+  public.has_role(auth.uid(), 'admin'::app_role)
+  OR public.has_role(auth.uid(), 'manager'::app_role)
+)
+```
+
+---
+
+## 10. Auto-delete orphaned uploads
 
 If a user uploads an image but then cancels the form, the file remains in storage. Track the uploaded path in component state and delete it on cancel:
 

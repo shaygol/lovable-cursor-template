@@ -1,6 +1,6 @@
 <div dir="rtl">
 
-# Lovable to Cursor: savta_yoel
+# Lovable to Cursor: <TITLE>
 
 > [README in English](README.md) | [Original Lovable README](README_lovable.md)
 
@@ -38,32 +38,51 @@ setup.bat <LOVABLE_GITHUB_URL>
 setup.bat
 ```
 
-### מה הסקריפט עושה (9 שלבים)
+### בחירת מצב עבודה
+
+הסקריפט מציע שני מצבים:
+
+| | מצב 1: Cursor בלבד | מצב 2: Cursor + Lovable |
+|---|---|---|
+| **Git** | היסטוריה חדשה, ניתוק מ-Lovable | שמירת החיבור ל-GitHub, Lovable ממשיך לפעול |
+| **תלויות Lovable** | מוסרות (`lovable-tagger`, `cloud-auth-js`) | נשמרות כמות שהן |
+| **אחרי ה-setup** | יצירת ריפו GitHub ו-push | `git push` — Lovable מסתנכרן אוטומטית |
+| **מתאים ל** | פיתוח מלא ב-Cursor | עבודה משני הכלים במקביל |
+
+### מה הסקריפט עושה (11 שלבים)
 
 | פעולה | שלב |
 |-------|------|
 | שיבוט (Clone) הפרויקט מ-Lovable לתיקייה זמנית | 1 |
-| שמירת ה-README המקורי של Lovable כ-`README_lovable.md` | 2 |
-| מיזוג קבצי הקונפיגורציה (`package.json`, `vite.config.ts`, `tailwind.config.ts` ועוד) | 3 |
-| העתקת תיקיות הקוד (`src/`, `public/`, `supabase/`) | 4 |
+| העתקת קבצי קונפיגורציה — מדלג על `index.html` במצב 2 | 2 |
+| העתקת תיקיות קוד (`src/`, `public/`, `supabase/`) — מגן על `src/integrations/` במצב 2 | 3 |
+| שמירת ה-README המקורי של Lovable כ-`README_lovable.md` | 4 |
 | החלפת `<TITLE>` בשם הפרויקט שהוזן בקבצי ה-README | 5 |
-| ניקוי התיקייה הזמנית | 6 |
-| איפוס Git - מחיקת ההיסטוריה של התבנית ויצירת ריפו חדש ונקי | 7 |
-| התקנת כל התלויות (`npm install`) | 8 |
-| יצירת commit בסיס המסמן את נקודת ההתחלה לפיתוח | 9 |
+| הסרת תלויות Lovable (`lovable-tagger`) — במצב 1 בלבד | 6 |
+| הוספת רשומות Cursor-only ל-`.gitignore` (מניעת העלאה ל-GitHub) | 7 |
+| יצירת `.env` מ-`.env.example` | 8 |
+| ניקוי התיקייה הזמנית | 9 |
+| הגדרת Git — ריפו חדש במצב 1 / commit ו-push במצב 2 | 10 |
+| התקנת כל התלויות (`npm install --legacy-peer-deps`) | 11 |
 
 ### שלב 3 — אחרי ההתקנה
 
 ```bash
-# דחיפת ה-commit הבסיסי לריפו שלך
-git push -u origin master
-
 # הרצת הפרויקט
 npm run dev
 
-# עדכון מבנה בסיס הנתונים ב-ai-utils/db-schema.md
+# הרצת supabase/init-schema.sql ב-Supabase SQL Editor
+
+# עדכון מבנה בסיס הנתונים לסוכן ה-AI
+# הרץ ב-Supabase SQL Editor והדבק לתוך ai-utils/db-schema.md:
+# SELECT table_name, column_name, data_type
+# FROM information_schema.columns
+# WHERE table_schema = 'public';
+
 # פתיחה ב-Cursor והתחלת פיתוח!
 ```
+
+> **למצב 1 בלבד:** אחרי ה-setup צור ריפו ב-GitHub ודחוף: `git remote add origin <URL>` ואז `git push -u origin master`
 
 ## ארכיטקטורת המערכת (The Stack)
 
@@ -105,7 +124,7 @@ npm run build
 <div dir="ltr">
 
 ```
-savta_yoel/
+<project-name>/
 ├── ai-utils/             # קבצי קונפיגורציה והנחיות לסוכני AI
 │   ├── db-schema.md      # הגדרות מבנה בסיס הנתונים - מקור האמת היחיד
 │   ├── ui-style.md       # מדריך סגנון ויזואלי (Design System)

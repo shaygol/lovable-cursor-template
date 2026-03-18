@@ -1,4 +1,4 @@
-# Lovable to Cursor: savta_yoel
+# Lovable to Cursor: <TITLE>
 
 > [README in Hebrew](README_he.md) | [Original Lovable README](README_lovable.md)
 
@@ -49,20 +49,21 @@ The script asks you to choose between two modes:
 
 > **Tip for mode 2:** Avoid editing the same file from both Cursor and Lovable simultaneously to prevent merge conflicts.
 
-### What the Script Does (10 Steps)
+### What the Script Does (11 Steps)
 
 | Step | Action |
 |------|--------|
 | 1 | Clones the Lovable project to a temporary folder |
-| 2 | Copies configuration files (`package.json`, `vite.config.ts`, etc.) |
-| 3 | Copies source directories (`src/`, `public/`, `supabase/`) |
+| 2 | Copies configuration files (`package.json`, `vite.config.ts`, etc.) — skips `index.html` in mode 2 |
+| 3 | Copies source directories (`src/`, `public/`, `supabase/`) — protects `src/integrations/` in mode 2 |
 | 4 | Saves the original Lovable README as `README_lovable.md` |
 | 5 | Replaces `<TITLE>` with the entered project name in README files |
 | 6 | Removes Lovable-specific dependencies (mode 1 only) |
-| 7 | Creates `.env` from `.env.example` |
-| 8 | Cleans up the temporary folder |
-| 9 | Git setup (fresh repo for mode 1 / commit template files for mode 2) |
-| 10 | Installs all dependencies (`npm install --legacy-peer-deps`) |
+| 7 | Adds Cursor-only entries to `.gitignore` (prevents template files from being pushed to GitHub) |
+| 8 | Creates `.env` from `.env.example` |
+| 9 | Cleans up the temporary folder |
+| 10 | Git setup (fresh repo for mode 1 / commit + push for mode 2) |
+| 11 | Installs all dependencies (`npm install --legacy-peer-deps`) |
 
 ### Step 3 — After Setup
 
@@ -122,7 +123,7 @@ npm run build
 Designed for easy navigation by both human developers and AI agents, with a clear separation between logic, design, and configuration:
 
 ```
-savta_yoel/
+<project-name>/
 ├── ai-utils/             # The operational brain: AI agent configuration and guidance files
 │   ├── db-schema.md      # Database schema definitions - the single source of truth for data
 │   ├── ui-style.md       # Visual style guide for design consistency (Design System)

@@ -83,21 +83,40 @@ echo     Done.
 :: Step 2: Copy config files
 :: -----------------------------------------------
 echo [2] Copying config files...
-for %%F in (
-    ".setup-temp\package.json"
-    ".setup-temp\package-lock.json"
-    ".setup-temp\bun.lockb"
-    ".setup-temp\vite.config.ts"
-    ".setup-temp\tailwind.config.ts"
-    ".setup-temp\tsconfig.json"
-    ".setup-temp\tsconfig.app.json"
-    ".setup-temp\tsconfig.node.json"
-    ".setup-temp\components.json"
-    ".setup-temp\postcss.config.js"
-    ".setup-temp\eslint.config.js"
-    ".setup-temp\index.html"
-) do (
-    if exist "%%~F" copy /Y "%%~F" "." >nul 2>nul
+if "!WORK_MODE!"=="2" (
+    echo     Mode 2: skipping index.html ^(Lovable owns it^)
+    for %%F in (
+        ".setup-temp\package.json"
+        ".setup-temp\package-lock.json"
+        ".setup-temp\bun.lockb"
+        ".setup-temp\vite.config.ts"
+        ".setup-temp\tailwind.config.ts"
+        ".setup-temp\tsconfig.json"
+        ".setup-temp\tsconfig.app.json"
+        ".setup-temp\tsconfig.node.json"
+        ".setup-temp\components.json"
+        ".setup-temp\postcss.config.js"
+        ".setup-temp\eslint.config.js"
+    ) do (
+        if exist "%%~F" copy /Y "%%~F" "." >nul 2>nul
+    )
+) else (
+    for %%F in (
+        ".setup-temp\package.json"
+        ".setup-temp\package-lock.json"
+        ".setup-temp\bun.lockb"
+        ".setup-temp\vite.config.ts"
+        ".setup-temp\tailwind.config.ts"
+        ".setup-temp\tsconfig.json"
+        ".setup-temp\tsconfig.app.json"
+        ".setup-temp\tsconfig.node.json"
+        ".setup-temp\components.json"
+        ".setup-temp\postcss.config.js"
+        ".setup-temp\eslint.config.js"
+        ".setup-temp\index.html"
+    ) do (
+        if exist "%%~F" copy /Y "%%~F" "." >nul 2>nul
+    )
 )
 echo     Done.
 
@@ -107,7 +126,25 @@ echo     Done.
 echo [3] Copying src/ public/ supabase/ directories...
 if exist ".setup-temp\src" (
     if not exist "src" mkdir "src"
-    xcopy ".setup-temp\src\*" "src\" /E /Y /Q >nul
+    if "!WORK_MODE!"=="2" (
+        echo     Mode 2: protecting src/integrations/ ^(Lovable owns supabase client^)
+        :: Build exclude list file for xcopy
+        echo integrations\ > .xcopy-exclude.tmp
+        xcopy ".setup-temp\src\*" "src\" /E /Y /Q /EXCLUDE:.xcopy-exclude.tmp >nul 2>nul
+        del .xcopy-exclude.tmp >nul 2>nul
+        :: Only copy integrations if it does not exist at all yet (first-time setup)
+        if exist ".setup-temp\src\integrations" (
+            if not exist "src\integrations\supabase\client.ts" (
+                if not exist "src\integrations" mkdir "src\integrations"
+                xcopy ".setup-temp\src\integrations\*" "src\integrations\" /E /Y /Q >nul
+                echo     Copied src/integrations/ ^(first-time only^).
+            ) else (
+                echo     src/integrations/ already exists, skipping.
+            )
+        )
+    ) else (
+        xcopy ".setup-temp\src\*" "src\" /E /Y /Q >nul
+    )
 )
 if exist ".setup-temp\public" (
     if not exist "public" mkdir "public"
@@ -134,9 +171,15 @@ if exist ".setup-temp\README.md" (
 :: Step 5: Set project title in template README files
 :: -----------------------------------------------
 echo [5] Setting project title in README files...
-powershell -Command "(Get-Content 'README.md' -Encoding UTF8) -replace '<TITLE>', '!PROJECT_TITLE!' | Set-Content 'README.md' -Encoding UTF8"
-powershell -Command "(Get-Content 'README_he.md' -Encoding UTF8) -replace '<TITLE>', '!PROJECT_TITLE!' | Set-Content 'README_he.md' -Encoding UTF8"
-echo     Done.
+if "!WORK_MODE!"=="2" (
+    echo     Mode 2: skipping README.md ^(keeping Lovable version^)
+    powershell -Command "(Get-Content 'README_he.md' -Encoding UTF8) -replace '<TITLE>', '!PROJECT_TITLE!' | Set-Content 'README_he.md' -Encoding UTF8"
+    echo     Updated README_he.md only.
+) else (
+    powershell -Command "(Get-Content 'README.md' -Encoding UTF8) -replace '<TITLE>', '!PROJECT_TITLE!' | Set-Content 'README.md' -Encoding UTF8"
+    powershell -Command "(Get-Content 'README_he.md' -Encoding UTF8) -replace '<TITLE>', '!PROJECT_TITLE!' | Set-Content 'README_he.md' -Encoding UTF8"
+    echo     Done.
+)
 
 :: -----------------------------------------------
 :: Step 6: Remove Lovable-specific dependencies (mode 1 only)
@@ -151,9 +194,37 @@ if "!WORK_MODE!"=="1" (
 )
 
 :: -----------------------------------------------
-:: Step 7: Create .env from example
+:: Step 7: Ensure Cursor-only files are in .gitignore
 :: -----------------------------------------------
-echo [7] Setting up .env...
+echo [7] Updating .gitignore...
+:: Always append the block — use a unique marker line to detect if already applied
+findstr /C:"## cursor-template-ignore-block ##" .gitignore >nul 2>nul
+if errorlevel 1 (
+    echo. >> .gitignore
+    echo ## cursor-template-ignore-block ## >> .gitignore
+    echo # Cursor-only files (local AI context, not for GitHub) >> .gitignore
+    echo .cursorrules >> .gitignore
+    echo .env.example >> .gitignore
+    echo ai-utils/ >> .gitignore
+    echo supabase/migrations/ >> .gitignore
+    echo README_he.md >> .gitignore
+    echo README_lovable.md >> .gitignore
+    echo setup.bat >> .gitignore
+    echo .setup-temp/ >> .gitignore
+    if "!WORK_MODE!"=="2" (
+        echo vercel.json >> .gitignore
+        echo     Added Cursor-only entries to .gitignore ^(including vercel.json for Lovable mode^).
+    ) else (
+        echo     Added Cursor-only entries to .gitignore.
+    )
+) else (
+    echo     .gitignore already contains Cursor-only entries, skipping.
+)
+
+:: -----------------------------------------------
+:: Step 8: Create .env from example
+:: -----------------------------------------------
+echo [8] Setting up .env...
 if not exist ".env" (
     if exist ".env.example" (
         copy /Y ".env.example" ".env" >nul
@@ -168,17 +239,17 @@ if not exist ".env" (
 )
 
 :: -----------------------------------------------
-:: Step 8: Clean up temp folder
+:: Step 9: Clean up temp folder
 :: -----------------------------------------------
-echo [8] Cleaning up temp files...
+echo [9] Cleaning up temp files...
 rmdir /S /Q ".setup-temp"
 echo     Done.
 
 :: -----------------------------------------------
-:: Step 9: Git setup
+:: Step 10: Git setup
 :: -----------------------------------------------
 if "!WORK_MODE!"=="1" (
-    echo [9] Initializing fresh git repository...
+    echo [10] Initializing fresh git repository...
     if exist ".git" rmdir /S /Q ".git"
     git init >nul
     git add .
@@ -188,16 +259,24 @@ if "!WORK_MODE!"=="1" (
     echo       git remote add origin ^<YOUR_REPO_URL^>
     echo       git push -u origin master
 ) else (
-    echo [9] Keeping existing git connection to Lovable...
+    echo [10] Committing and pushing to Lovable/GitHub...
+    echo     Note: .cursorrules, ai-utils/, setup.bat are in .gitignore and will NOT be pushed.
     git add .
-    git commit -m "Add Cursor template files: .cursorrules, ai-utils, vercel.json" >nul
-    echo     Committed template files. Remote stays connected to Lovable/GitHub.
+    git commit -m "Add Cursor template files: vercel.json, supabase schema" >nul
+    :: Detect the current branch and push to the same remote branch
+    for /f "delims=" %%B in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "CURRENT_BRANCH=%%B"
+    git push origin !CURRENT_BRANCH!
+    if errorlevel 1 (
+        echo     WARNING: Push failed. Run 'git push origin !CURRENT_BRANCH!' manually after setup.
+    ) else (
+        echo     Pushed to GitHub ^(branch: !CURRENT_BRANCH!^). Lovable will sync automatically.
+    )
 )
 
 :: -----------------------------------------------
-:: Step 10: Install dependencies
+:: Step 11: Install dependencies
 :: -----------------------------------------------
-echo [10] Installing dependencies...
+echo [11] Installing dependencies...
 call npm install --legacy-peer-deps
 echo     Done.
 

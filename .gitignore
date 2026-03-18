@@ -20,6 +20,10 @@ Thumbs.db
 
 # Temp files created by setup.bat
 .lovable-temp/
+.setup-temp/
 
-# Generated after setup (project-specific, not part of template)
-README_lovable.md
+# Cursor-only files (local AI context, not for GitHub)
+.cursorrules
+.env.example
+ai-utils/
+supabase/migrations/

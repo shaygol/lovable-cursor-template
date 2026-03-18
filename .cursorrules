@@ -14,6 +14,9 @@ You are an expert Full-stack developer. Your goal is to maintain high-quality co
 - PLACEHOLDERS: Use descriptive placeholder names (e.g., 'table_name', 'column_name') in comments where SQL/Supabase logic is required, ensuring easy replacement later.
 - RLS ENUMS: When writing RLS policies that check a custom enum role (e.g., `app_role`), always cast string literals explicitly: `'admin'::app_role`. A plain `'admin'` string will cause a type mismatch error at runtime.
 - RLS FUNCTION PREFIX: Always call custom functions with the `public.` schema prefix inside storage policies: `public.has_role(auth.uid(), 'admin'::app_role)`. Storage policies run in the `storage` schema context and will not resolve unqualified function names.
+- RLS NO USING TRUE: NEVER write `USING (true)` on any table that contains PII (name, phone, email, address, financial data). Always restrict SELECT to the owner (`auth.uid() = user_id`) or to admin/manager roles (`public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'manager')`). `USING (true)` is only acceptable for fully public reference data (e.g., app_settings).
+- RLS STORAGE DELETE: Never allow DELETE on storage buckets with `USING (bucket_id = '...')` alone. Always add an ownership or role check to prevent any authenticated user from deleting other users' files.
+- EDGE FUNCTION ROLES: Every Edge Function that accesses private storage or sensitive data must verify the caller's role (admin/manager) after auth verification. Auth alone is not sufficient.
 
 ## Supabase Auth & Storage (CRITICAL)
 - API KEY: Always use the Supabase **anon JWT** (`eyJ...`) as `VITE_SUPABASE_ANON_KEY`. Never use a platform publishable key (e.g., `sb_publishable_...`) — it will silently fail for all authenticated requests.
@@ -57,3 +60,21 @@ You are an expert Full-stack developer. Your goal is to maintain high-quality co
 - NO FAKE SUCCESS: Never show `toast.success` before a Supabase operation completes and returns without error. Always `await` the result, check the `error` field, and only then trigger success feedback.
 - NO HARDCODED AMOUNTS: Never render currency amounts as `` `$${x.toLocaleString()}` ``. Always use a formatting function or hook that respects the user's preferred currency/locale.
 - UNUSED CODE: After any refactor, remove unused variables and imports immediately. Dead `const sym = ...` declarations and unused icon imports cause linter noise and obscure real issues.
+
+## Git & Deployment (CRITICAL)
+- GIT BRANCH: Always push to the production branch connected to Lovable (typically `main`). Confirm which branch Lovable is tracking before pushing.
+- GITIGNORE FIRST: Before committing, verify that Cursor-only files (`.cursorrules`, `ai-utils/`, `.env`, `.env.example`) are in `.gitignore`. These must never be pushed to GitHub.
+- OPTIMISTIC STATE ROLLBACK: When using optimistic UI updates (adding to local state before DB confirms), always roll back the local state on error. Never leave the UI showing data that failed to persist.
+
+## Lovable Compatibility (CRITICAL)
+When working on a project that is connected to Lovable, the following files are owned by Lovable and must never be deleted or structurally broken:
+- `vite.config.ts` — must keep `componentTagger()` from `lovable-tagger` in the plugins array (development mode only). Removing it breaks Lovable's component tagging.
+- `package.json` — must keep `lovable-tagger` in `devDependencies`. Lovable uses this to identify components in the editor.
+- `index.html` — Lovable manages the meta tags (`og:title`, `og:image`, `twitter:*`). Do not remove its structure; only update the `<title>` tag if needed.
+- `src/components/ui/` — all shadcn components. Lovable regenerates these. Do not modify them manually; let Lovable manage them.
+- `src/integrations/supabase/client.ts` — Lovable manages this file when connecting Supabase. Use env vars with fallback: `import.meta.env.VITE_SUPABASE_URL ?? "hardcoded-fallback"`.
+
+Files that are safe to add/modify freely without affecting Lovable:
+- All `src/components/views/`, `src/hooks/`, `src/pages/`, `src/types.ts`, `src/config.ts`
+- `supabase/init-schema.sql`, `supabase/functions/`, `supabase/migrations/`
+- `tailwind.config.ts`, `tsconfig*.json`, `eslint.config.js`
